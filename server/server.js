@@ -1,7 +1,11 @@
 //Requiere
 require('./config/config')
+require('./routes/usuario')
 const express = require("express");
+const mongoose = require("mongoose");
+
 var bodyParser = require("body-parser");
+
 
 const app = express();
 
@@ -12,36 +16,32 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-app.get("/usuario", function (req, res) {
-  res.json("get user");
-});
-
-app.post("/usuario", function (req, res) {
-  let body = req.body;
-
-  if (body.nombre === undefined) {
-    res.status(400).json({
-      ok: false,
-      message: "Se require un nombre",
-    });
-  } else {
-    res.json({
-      usuario: body,
-    });
-  }
-});
-
-app.put("/usuario/:id", function (req, res) {
-  let id = parseInt(req.params.id);
-  res.json({
-    id,
-  });
-});
-
-app.delete("/usuario", function (req, res) {
-  res.json("delete user");
-});
+app.use( require("./routes/usuario"))
 
 app.listen(process.env.PORT, () => {
-  console.log("Escuchando el puerto", process.env.PORT);
+  console.log(`Escuchando el puerto ${process.env.PORT}` );
 });
+
+
+const conetarBD = async() =>{
+  
+  const BD = await mongoose.connect(process.env.URLDB, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true
+  })
+
+  return BD;
+}
+
+conetarBD()
+  .then(resp => {
+
+    console.log('La base de datos a sido conectada con exito');
+  })
+  .catch(err => {
+  
+    console.log('Ha ocurrido un error');
+    console.log(err);
+  })
